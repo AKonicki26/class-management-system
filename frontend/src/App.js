@@ -1,10 +1,9 @@
-import logo from './logo.svg';
 import './App.css';
 import TableView from "./components/TableView";
 import {useState} from "react";
 
 function App() {
-    const [loggedIn, setLoggedIn] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(true);
     
   return (
     <div className="App">

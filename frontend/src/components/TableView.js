@@ -8,33 +8,255 @@ const TableView = ({asAdmin}) => {
     const [enrollments, setEnrollments] = useState([]);
     
     
-    const datasource = process.env.REACT_APP_DATA_SOURCE;
+    const dataSource = process.env.REACT_APP_DATA_SOURCE;
     
+    
+    
+    // Creations
+
+    const [majorText, setMajorText] = useState('');
+    const [divisionText, setDivisionText] = useState('');
+    const createMajor= async (e) => {
+        e.preventDefault();
+        console.log(majorText,  divisionText);
+        await fetch(`${dataSource}/majors`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({major_name: majorText, division: divisionText})
+        });
+        setMajorText(null);
+        setDivisionText(null);
+        fetchData();
+    }
+
+    // Student creation
+    const [newStudentFirstName, setNewStudentFirstName] = useState('');
+    const [newStudentLastName, setNewStudentLastName] = useState('');
+    const [newStudentEmail, setNewStudentEmail] = useState('');
+    const [newStudentGraduatingYear, setNewStudentGraduatingYear] = useState('');
+    const [newStudentMajorId, setNewStudentMajorId] = useState('');
+
+    const createStudent = async (e) => {
+        e.preventDefault();
+        await fetch(`${dataSource}/students`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                first_name: newStudentFirstName,
+                last_name: newStudentLastName,
+                email: newStudentEmail,
+                major_id: newStudentMajorId,
+                graduating_year: newStudentGraduatingYear
+            })
+        });
+        setNewStudentFirstName('');
+        setNewStudentLastName('');
+        setNewStudentEmail('');
+        setNewStudentGraduatingYear('');
+        setNewStudentMajorId('');
+        fetchData();
+    }
+
+    // Section creation
+    const [newSectionCourseId, setNewSectionCourseId] = useState('');
+    const [newSectionTime, setNewSectionTime] = useState('');
+    const [newSectionRoom, setNewSectionRoom] = useState('');
+
+    const createSection = async (e) => {
+        e.preventDefault();
+        await fetch(`${dataSource}/sections`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                course_id: newSectionCourseId,
+                time: newSectionTime,
+                room: newSectionRoom
+            })
+        });
+        setNewSectionCourseId('');
+        setNewSectionTime('');
+        setNewSectionRoom('');
+        fetchData();
+    }
+
+    // Enrollment creation
+    const [newEnrollmentStudentId, setNewEnrollmentStudentId] = useState('');
+    const [newEnrollmentSectionId, setNewEnrollmentSectionId] = useState('');
+
+    const createEnrollment = async (e) => {
+        e.preventDefault();
+        await fetch(`${dataSource}/enrollments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: newEnrollmentStudentId,
+                course_section_id: newEnrollmentSectionId
+            })
+        });
+        setNewEnrollmentStudentId('');
+        setNewEnrollmentSectionId('');
+        fetchData();
+    }
+
+    // Major Editing
+    const deleteMajor= async (id) => {
+        await fetch(`${dataSource}/majors/${id}`, { method: 'DELETE'});
+        fetchData();
+    }
+
+    const [editingMajorId, setEditingMajorId] = useState(null);
+    const [editingMajorText, setEditingMajorText] = useState('');
+    const [editingDivisionText, setEditingDivisionText] = useState('');
+    
+    const updateMajor = async (id) => {
+        await fetch(`${dataSource}/majors/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ major: editingMajorText, division: editingDivisionText })
+        });
+        setEditingMajorId(null);
+        fetchData();
+    }
+    
+    // Course Editing
+    const [editingCourseId, setEditingCourseId] = useState(null);
+    const [editingCoursePrefix, setEditingCoursePrefix] = useState('');
+    const [editingCourseNumber, setEditingCourseNumber] = useState('');
+    const [editingCourseName, setEditingCourseName] = useState('');
+    const [editingCourseDescription, setEditingCourseDescription] = useState('');
+
+    const updateCourse = async (id) => {
+        await fetch(`${dataSource}/courses/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prefix: editingCoursePrefix,
+                number: editingCourseNumber,
+                name: editingCourseName,
+                description: editingCourseDescription,
+            })
+        });
+        setEditingCourseId(null);
+        fetchData();
+    }
+
+    const deleteCourse = async (id) => {
+        await fetch(`${dataSource}/courses/${id}`, { method: 'DELETE' });
+        fetchData();
+    }
+
+    // Students editing
+    const [editingStudentId, setEditingStudentId] = useState(null);
+    const [editingStudentFirstName, setEditingStudentFirstName] = useState('');
+    const [editingStudentLastName, setEditingStudentLastName] = useState('');
+    const [editingStudentGraduatingYear, setEditingStudentGraduatingYear] = useState('');
+    const [editingStudentMajor, setEditingStudentMajor] = useState('');
+
+    const updateStudent = async (id) => {
+        await fetch(`${dataSource}/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                first_name: editingStudentFirstName,
+                last_name: editingStudentLastName,
+                email: `${editingStudentFirstName}.${editingStudentLastName}@mymail.champlain.edu`.toLowerCase().replace(' ', ''),
+                graduating_year: editingStudentGraduatingYear,
+                major_id: editingStudentMajor,
+            })
+        });
+        setEditingStudentId(null);
+        fetchData();
+    }
+
+    const deleteStudent = async (id) => {
+        await fetch(`${dataSource}/students/${id}`, { method: 'DELETE' });
+        fetchData();
+    }
+
+    // Enrollments Editing
+    const [editingEnrollmentId, setEditingEnrollmentId] = useState(null);
+    const [editingQuizGrade1, setEditingQuizGrade1] = useState(0);
+    const [editingQuizGrade2, setEditingQuizGrade2] = useState(0);
+    const [editingProjectGrade1, setEditingProjectGrade1] = useState(0);
+    const [editingProjectGrade2, setEditingProjectGrade2] = useState(0);
+    const [editingFinalExamGrade, setEditingFinalExamGrade] = useState(0);
+
+    const clampGrade = (grade) => Math.min(Math.max(grade, 0), 100);
+    
+    const updateEnrollment = async (studentId, sectionId) => {
+        await fetch(`${dataSource}/enrollments/${studentId}/${sectionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                quiz_grade_1: clampGrade(editingQuizGrade1),
+                quiz_grade_2: clampGrade(editingQuizGrade2),
+                project_grade_1: clampGrade(editingProjectGrade1),
+                project_grade_2: clampGrade(editingProjectGrade2),
+                final_exam_grade: clampGrade(editingFinalExamGrade),
+            })
+        });
+        setEditingEnrollmentId(null);
+        fetchData();
+    }
+
+    const deleteEnrollment = async (studentId, sectionId) => {
+        await fetch(`${dataSource}/enrollments/${studentId}/${sectionId}`, {
+            method: 'DELETE'
+        });
+        fetchData();
+    }
+
     const fetchData = () => {
-        fetch(`${datasource}/majors`)
+        fetch(`${dataSource}/majors`)
             .then(res => res.json())
             .then(setMajors);
-        fetch(`${datasource}/courses`)
+        fetch(`${dataSource}/courses`)
             .then(res => res.json())
             .then(setCourses);
-        fetch(`${datasource}/students`)
+        fetch(`${dataSource}/students`)
             .then(res => res.json())
             .then(setStudents);
-        fetch(`${datasource}/sections`)
+        fetch(`${dataSource}/sections`)
             .then(res => res.json())
             .then(setSections);
-        fetch(`${datasource}/enrollments`)
+        fetch(`${dataSource}/enrollments`)
             .then(res => res.json())
             .then(setEnrollments);
         
     }
     
     useEffect(() => {fetchData()});
+    
+    
+    
     return (
         <div>
             {/* Majors */}
             <div>
                 <h2>Majors</h2>
+                {asAdmin && (
+                    <div>
+                        <form onSubmit={createMajor}>
+                           <>
+                               <input
+                                    name="major_name"
+                                    placeholder="Major Name"
+                                    value={majorText || ''}
+                                    onChange={(e) => setMajorText(e.target.value)}
+                                    required
+                               />
+                               <input
+                                   name="division"
+                                   placeholder="Division"
+                                   value={divisionText || ''}
+                                   onChange={(e) => setDivisionText(e.target.value)}
+                                   required
+                               />
+                           </> 
+                            <button type="submit" >Add</button>
+                        </form>
+                    </div>
+                )}
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                     <tr>
@@ -48,12 +270,44 @@ const TableView = ({asAdmin}) => {
                     {majors.map(major => (
                         <tr key={major.major_id}>
                             <td>{major.major_id}</td>
-                            <td>{major.major}</td>
-                            <td>{major.division}</td>
+                            <td>
+                                {editingMajorId === major.major_id ? (
+                                    <input
+                                        value={editingMajorText}
+                                        onChange={(e) => setEditingMajorText(e.target.value)}
+                                    />
+                                ) : (
+                                    major.major
+                                )}
+                            </td>
+                            <td>
+                                {editingMajorId === major.major_id ? (
+                                    <input
+                                        value={editingDivisionText}
+                                        onChange={(e) => setEditingDivisionText(e.target.value)}
+                                    />
+                                ) : (
+                                    major.division
+                                )}
+                            </td>
                             {asAdmin && (
                                 <td>
-                                    <button onClick={() => {}}>Edit</button>
-                                    <button onClick={() => {}}>Delete</button>
+                                    {editingMajorId === major.major_id ? (
+                                        <>
+                                            <button onClick={() => updateMajor(major.major_id)}>Save</button>
+                                            <button onClick={() => setEditingMajorId(null)}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <button onClick={() => {
+                                            setEditingMajorId(major.major_id);
+                                            setEditingMajorText(major.major);
+                                            setEditingDivisionText(major.division);
+                                        }}>Edit</button>
+                                        <button onClick={() => deleteMajor(major.major_id)}>Delete</button>
+                                        </>
+                                    )}
+                                    
                                 </td>
                             )}
                         </tr>
@@ -64,11 +318,20 @@ const TableView = ({asAdmin}) => {
             {/* Courses */}
             <div>
                 <h2>Courses</h2>
+                
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                     <tr>
                         <th>Course ID</th>
-                        <th>Course Number</th>
+                        {asAdmin ?
+                            <>
+                                <th>Course Prefix</th>
+                                <th>Course Number</th>
+                            </>
+                            :
+                            <th>Course Number</th>
+                        }
+                        
                         <th>Course Name</th>
                         <th>Course Description</th>
                         {asAdmin && <th>Actions</th>}
@@ -78,23 +341,106 @@ const TableView = ({asAdmin}) => {
                     {courses.map(course => (
                         <tr key={course.course_id}>
                             <td>{course.course_id}</td>
-                            <td>{`${course.prefix}-${course.number}`}</td>
-                            <td>{course.name}</td>
-                            <td>{course.description}</td>
+                            {asAdmin ? (
+                                editingCourseId === course.course_id ? (
+                                    <>
+                                        <td>
+                                            <input
+                                                value={editingCoursePrefix}
+                                                onChange={(e) => setEditingCoursePrefix(e.target.value)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                value={editingCourseNumber}
+                                                onChange={(e) => setEditingCourseNumber(e.target.value)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                value={editingCourseName}
+                                                onChange={(e) => setEditingCourseName(e.target.value)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                value={editingCourseDescription}
+                                                onChange={(e) => setEditingCourseDescription(e.target.value)}
+                                            />
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{course.prefix}</td>
+                                        <td>{course.number}</td>
+                                        <td>{course.name}</td>
+                                        <td>{course.description}</td>
+                                    </>
+                                )
+                            ) : (
+                                <td>{`${course.prefix}-${course.number}`}</td>
+                            )}
                             {asAdmin && (
                                 <td>
-                                    <button onClick={() => {}}>Edit</button>
-                                    <button onClick={() => {}}>Delete</button>
+                                    {editingCourseId === course.course_id ? (
+                                        <>
+                                            <button onClick={() => updateCourse(course.course_id)}>Save</button>
+                                            <button onClick={() => setEditingCourseId(null)}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => {
+                                                setEditingCourseId(course.course_id);
+                                                setEditingCoursePrefix(course.prefix);
+                                                setEditingCourseNumber(course.number);
+                                                setEditingCourseName(course.name);
+                                                setEditingCourseDescription(course.description);
+                                            }}>
+                                                Edit
+                                            </button>
+                                            <button onClick={() => deleteCourse(course.course_id)}>Delete</button>
+                                        </>
+                                    )}
                                 </td>
                             )}
                         </tr>
                     ))}
                     </tbody>
+
                 </table>
             </div>
             {/* Sections */}
             <div>
                 <h2>Sections</h2>
+                {asAdmin && (
+                    <div>
+                        <form onSubmit={createSection}>
+                            <select
+                                value={newSectionCourseId}
+                                onChange={(e) => setNewSectionCourseId(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Course</option>
+                                {courses.map(course => (
+                                    <option key={course.course_id} value={course.course_id}>{`${course.prefix}-${course.number}: ${course.name}`}</option>
+                                ))}
+                            </select>
+                            <input
+                                placeholder="Time"
+                                value={newSectionTime}
+                                onChange={(e) => setNewSectionTime(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Room"
+                                value={newSectionRoom}
+                                onChange={(e) => setNewSectionRoom(e.target.value)}
+                                required
+                            />
+                            <button type="submit">Add Section</button>
+                        </form>
+                    </div>
+                )}
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                     <tr>
@@ -128,11 +474,62 @@ const TableView = ({asAdmin}) => {
             {/* Students */}
             <div>
                 <h2>Students</h2>
+                {asAdmin && (
+                    <div>
+                        <form onSubmit={createStudent}>
+                            <input
+                                placeholder="First Name"
+                                value={newStudentFirstName}
+                                onChange={(e) => setNewStudentFirstName(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Last Name"
+                                value={newStudentLastName}
+                                onChange={(e) => setNewStudentLastName(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Email"
+                                type="email"
+                                value={newStudentEmail}
+                                onChange={(e) => setNewStudentEmail(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Graduating Year"
+                                type="number"
+                                value={newStudentGraduatingYear}
+                                onChange={(e) => setNewStudentGraduatingYear(e.target.value)}
+                                required
+                            />
+                            <select
+                                value={newStudentMajorId}
+                                onChange={(e) => setNewStudentMajorId(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Major</option>
+                                {majors.map(major => (
+                                    <option key={major.major_id} value={major.major_id}>{major.major}</option>
+                                ))}
+                            </select>
+                            <button type="submit">Add Student</button>
+                        </form>
+                    </div>
+                )}
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                         <tr>
                             <th>Student ID</th>
-                            <th>Name</th>
+                            {asAdmin ?
+                                <>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                </>
+                                :
+                                <th>Name</th>
+                            }
+                            
                             <th>E-Mail</th>
                             <th>Major</th>
                             <th>Graduating Year</th>
@@ -143,24 +540,123 @@ const TableView = ({asAdmin}) => {
                     {students.map(student => (
                         <tr key={student.student_id}>
                             <td>{student.student_id}</td>
-                            <td>{`${(student.preferred_name === null ? student.first_name : student.preferred_name)} ${student.last_name}`}</td>
+                            {asAdmin ? (
+                                editingStudentId === student.student_id ? (
+                                    <>
+                                        <td>
+                                            <input
+                                                value={editingStudentFirstName}
+                                                onChange={(e) => setEditingStudentFirstName(e.target.value)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                value={editingStudentLastName}
+                                                onChange={(e) => setEditingStudentLastName(e.target.value)}
+                                            />
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{student.first_name}</td>
+                                        <td>{student.last_name}</td>
+                                    </>
+                                )
+                            ) : (
+                                <td>{`${(student.preferred_name === null ? student.first_name : student.preferred_name)} ${student.last_name}`}</td>
+                            )}
                             <td>{student.email}</td>
-                            <td>{student.major}</td>
-                            <td>{student.graduating_year}</td>
+                            <td>
+                                {editingStudentId === student.student_id ? (
+                                    <select
+                                        value={editingStudentMajor}
+                                        onChange={(e) => setEditingStudentMajor(e.target.value)}
+                                    >
+                                        <option value="">Select Major</option>
+                                        {majors.map((major) => (
+                                            <option key={major.major_id} value={major.major_id}>
+                                                {major.major}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    student.major
+                                )}
+                            </td>
+                            <td>
+                                {editingStudentId === student.student_id ? (
+                                    <input
+                                        type="number"
+                                        value={editingStudentGraduatingYear}
+                                        onChange={(e) => setEditingStudentGraduatingYear(e.target.value)}
+                                    />
+                                ) : (
+                                    student.graduating_year
+                                )}
+                            </td>
                             {asAdmin && (
                                 <td>
-                                    <button onClick={() => {}}>Edit</button>
-                                    <button onClick={() => {}}>Delete</button>
+                                    {editingStudentId === student.student_id ? (
+                                        <>
+                                            <button onClick={() => updateStudent(student.student_id)}>Save</button>
+                                            <button onClick={() => setEditingStudentId(null)}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => {
+                                                setEditingStudentId(student.student_id);
+                                                setEditingStudentFirstName(student.first_name);
+                                                setEditingStudentLastName(student.last_name);
+                                                setEditingStudentGraduatingYear(student.graduating_year);
+                                                setEditingStudentMajor(student.major_id);
+                                            }}>
+                                                Edit
+                                            </button>
+                                            <button onClick={() => deleteStudent(student.student_id)}>Delete</button>
+                                        </>
+                                    )}
                                 </td>
                             )}
                         </tr>
                     ))}
                     </tbody>
+
                 </table>
             </div>
             {/* Enrollments */}
             <div>
                 <h2>Enrollments</h2>
+                {asAdmin && (
+                    <div>
+                        <form onSubmit={createEnrollment}>
+                            <select
+                                value={newEnrollmentStudentId}
+                                onChange={(e) => setNewEnrollmentStudentId(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Student</option>
+                                {students.map(student => (
+                                    <option key={student.student_id} value={student.student_id}>
+                                        {(student.preferred_name || student.first_name) + ' ' + student.last_name}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                value={newEnrollmentSectionId}
+                                onChange={(e) => setNewEnrollmentSectionId(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Section</option>
+                                {sections.map(section => (
+                                    <option key={section.course_section_id} value={section.course_section_id}>
+                                        {`${section.prefix}-${section.number}-${section.section_number}`}
+                                    </option>
+                                ))}
+                            </select>
+                            <button type="submit">Enroll Student</button>
+                        </form>
+                    </div>
+                )}
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                     <tr>
@@ -175,23 +671,57 @@ const TableView = ({asAdmin}) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {enrollments.map(enrollment => (
-                        <tr key={`student-${enrollment.student_id}-section-${enrollment.course_section_id}`}>
-                            <td>{`${(enrollment.preferred_name === null ? enrollment.first_name : enrollment.preferred_name)} ${enrollment.last_name}`}</td>
-                            <td>{`${enrollment.prefix}-${enrollment.number}-${enrollment.section_number}`}</td>
-                            <td>{(enrollment.quiz_grade_1 === null ? 0 : enrollment.quiz_grade_1)}</td>
-                            <td>{(enrollment.quiz_grade_2 === null ? 0 : enrollment.quiz_grade_2)}</td>
-                            <td>{(enrollment.project_grade_1 === null ? 0 : enrollment.project_grade_1)}</td>
-                            <td>{(enrollment.project_grade_2 === null ? 0 : enrollment.project_grade_2)}</td>
-                            <td>{(enrollment.final_exam_grade === null ? 0 : enrollment.final_exam_grade)}</td>
-                            {asAdmin && (
-                                <td>
-                                    <button onClick={() => {}}>Edit</button>
-                                    <button onClick={() => {}}>Delete</button>
-                                </td>
-                            )}
-                        </tr>
-                    ))}
+                    {enrollments.map(enrollment => {
+                        const enrollmentKey = `student-${enrollment.student_id}-section-${enrollment.course_section_id}`;
+                        const isEditing = editingEnrollmentId === enrollmentKey;
+                        return (
+                            <tr key={enrollmentKey}>
+                                <td>{`${(enrollment.preferred_name === null ? enrollment.first_name : enrollment.preferred_name)} ${enrollment.last_name}`}</td>
+                                <td>{`${enrollment.prefix}-${enrollment.number}-${enrollment.section_number}`}</td>
+
+                                {isEditing ? (
+                                    <>
+                                        <td><input type="number" value={editingQuizGrade1} onChange={(e) => setEditingQuizGrade1(e.target.value)} /></td>
+                                        <td><input type="number" value={editingQuizGrade2} onChange={(e) => setEditingQuizGrade2(e.target.value)} /></td>
+                                        <td><input type="number" value={editingProjectGrade1} onChange={(e) => setEditingProjectGrade1(e.target.value)} /></td>
+                                        <td><input type="number" value={editingProjectGrade2} onChange={(e) => setEditingProjectGrade2(e.target.value)} /></td>
+                                        <td><input type="number" value={editingFinalExamGrade} onChange={(e) => setEditingFinalExamGrade(e.target.value)} /></td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{enrollment.quiz_grade_1 ?? 0}</td>
+                                        <td>{enrollment.quiz_grade_2 ?? 0}</td>
+                                        <td>{enrollment.project_grade_1 ?? 0}</td>
+                                        <td>{enrollment.project_grade_2 ?? 0}</td>
+                                        <td>{enrollment.final_exam_grade ?? 0}</td>
+                                    </>
+                                )}
+
+                                {asAdmin && (
+                                    <td>
+                                        {isEditing ? (
+                                            <>
+                                                <button onClick={() => updateEnrollment(enrollment.student_id, enrollment.course_section_id)}>Save</button>
+                                                <button onClick={() => setEditingEnrollmentId(null)}>Cancel</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => {
+                                                    setEditingEnrollmentId(enrollmentKey);
+                                                    setEditingQuizGrade1(enrollment.quiz_grade_1 ?? 0);
+                                                    setEditingQuizGrade2(enrollment.quiz_grade_2 ?? 0);
+                                                    setEditingProjectGrade1(enrollment.project_grade_1 ?? 0);
+                                                    setEditingProjectGrade2(enrollment.project_grade_2 ?? 0);
+                                                    setEditingFinalExamGrade(enrollment.final_exam_grade ?? 0);
+                                                }}>Edit</button>
+                                                <button onClick={() => deleteEnrollment(enrollment.student_id, enrollment.course_section_id)}>Delete</button>
+                                            </>
+                                        )}
+                                    </td>
+                                )}
+                            </tr>
+                        )
+                    })}
                     </tbody>
                 </table>
             </div>
