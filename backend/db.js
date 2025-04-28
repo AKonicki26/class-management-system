@@ -165,6 +165,27 @@ db.serialize(() => {
         ON DELETE CASCADE
         ON UPDATE CASCADE
         );`);
+    
+    // Insert dummy values
+    db.run(`INSERT INTO major (major, division) VALUES ("Computer Science & Innovation", "Information Technology & Sciences"),
+                                           ("Data Analytics", "Information Technology & Sciences"),
+                                           ("Game Design", "Communication & Creative Media");
+
+INSERT INTO student (first_name, last_name, preferred_name, email, major_id, graduating_year) VALUES
+                                                                                                  ("Anne" , "Konicki", "Astrid", "anne.konicki@mymail.champlain.edu", 1, 2026);
+
+INSERT INTO course (prefix, number, name, description) VALUES
+                                                           ("CSI", "300", "Database Management Systems", "Learn to design relational databases"),
+                                                           ("DAT", "220", "Data Mining", "Mine information from data");
+
+INSERT INTO course_section (course_id, section_number, room, time) VALUES
+                                                                       (1, 01, "JOYCE 201", "2025-04-09 11:30:00"),
+                                                                       (1, 02, "JOYCE 201", "2025-04-09 10:00:00"),
+                                                                       (2, 01, "JOYCE 211", "2025-04-09 11:30:00");
+
+INSERT INTO student_course (student_id, course_section_id) VALUES
+                                                               (1, 1),
+                                                               (1, 3);`)
 });
 
 module.exports = db;

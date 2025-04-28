@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently --kill-others \"npm start --prefix frontend\" \"npm start --prefix backend\"",
-    "postinstall": "concurrently \"cd backend && npm install\" \"cd frontend && npm install\""
+    "postinstall": "concurrently \"cd backend && npm install\" \"cd frontend && npm install\"",
+    "first-run": "npm install && npm start"
   },
   "author": "",
   "license": "ISC",
