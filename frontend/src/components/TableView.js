@@ -10,7 +10,7 @@ const TableView = ({asAdmin}) => {
     
     const dataSource = process.env.REACT_APP_DATA_SOURCE;
     
-    
+    const getEmail = (firstName, lastName) => `${newStudentFirstName}.${newStudentLastName}@mymail.champlain.edu`.toLowerCase().replace(/[^0-9a-zA-Z.@]/g, '');
     
     // Creations
 
@@ -32,9 +32,33 @@ const TableView = ({asAdmin}) => {
     // Student creation
     const [newStudentFirstName, setNewStudentFirstName] = useState('');
     const [newStudentLastName, setNewStudentLastName] = useState('');
-    const [newStudentEmail, setNewStudentEmail] = useState('');
     const [newStudentGraduatingYear, setNewStudentGraduatingYear] = useState('');
     const [newStudentMajorId, setNewStudentMajorId] = useState('');
+
+    // Course creation
+    const [newCoursePrefix, setNewCoursePrefix] = useState('');
+    const [newCourseNumber, setNewCourseNumber] = useState('');
+    const [newCourseName, setNewCourseName] = useState('');
+    const [newCourseDescription, setNewCourseDescription] = useState('');
+
+    const createCourse = async (e) => {
+        e.preventDefault();
+        await fetch(`${dataSource}/courses`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prefix: newCoursePrefix,
+                number: newCourseNumber,
+                name: newCourseName,
+                description: newCourseDescription,
+            })
+        });
+        setNewCoursePrefix('');
+        setNewCourseNumber('');
+        setNewCourseName('');
+        setNewCourseDescription('');
+        fetchData();
+    }
 
     const createStudent = async (e) => {
         e.preventDefault();
@@ -44,14 +68,13 @@ const TableView = ({asAdmin}) => {
             body: JSON.stringify({
                 first_name: newStudentFirstName,
                 last_name: newStudentLastName,
-                email: newStudentEmail,
+                email: getEmail(newStudentFirstName, newStudentLastName),
                 major_id: newStudentMajorId,
                 graduating_year: newStudentGraduatingYear
             })
         });
         setNewStudentFirstName('');
         setNewStudentLastName('');
-        setNewStudentEmail('');
         setNewStudentGraduatingYear('');
         setNewStudentMajorId('');
         fetchData();
@@ -85,14 +108,28 @@ const TableView = ({asAdmin}) => {
 
     const createEnrollment = async (e) => {
         e.preventDefault();
-        await fetch(`${dataSource}/enrollments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                student_id: newEnrollmentStudentId,
-                course_section_id: newEnrollmentSectionId
-            })
-        });
+        
+        const selectedCourseId = sections.find(section => section.course_section_id === parseInt(newEnrollmentSectionId)).course_id;
+        
+        // if there already exists a section in which the student is enrolled for this course
+        if (enrollments.some(enroll =>
+            enroll.student_id === parseInt(newEnrollmentStudentId) &&
+            enroll.course_id === selectedCourseId
+        ))   
+        {
+            window.alert("You cannot enroll a student in multiple sections of the same course!");
+
+        } else {
+            await fetch(`${dataSource}/enrollments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_id: newEnrollmentStudentId,
+                    course_section_id: newEnrollmentSectionId
+                })
+            });
+        }
+        
         setNewEnrollmentStudentId('');
         setNewEnrollmentSectionId('');
         fetchData();
@@ -159,7 +196,7 @@ const TableView = ({asAdmin}) => {
             body: JSON.stringify({
                 first_name: editingStudentFirstName,
                 last_name: editingStudentLastName,
-                email: `${editingStudentFirstName}.${editingStudentLastName}@mymail.champlain.edu`.toLowerCase().replace(' ', ''),
+                email: getEmail(newStudentFirstName, newStudentLastName),
                 graduating_year: editingStudentGraduatingYear,
                 major_id: editingStudentMajor,
             })
@@ -172,6 +209,33 @@ const TableView = ({asAdmin}) => {
         await fetch(`${dataSource}/students/${id}`, { method: 'DELETE' });
         fetchData();
     }
+
+    // Section editing
+    const [editingSectionId, setEditingSectionId] = useState(null);
+    const [editingSectionTime, setEditingSectionTime] = useState('');
+    const [editingSectionRoom, setEditingSectionRoom] = useState('');
+
+    const updateSection = async (e) => {
+        e.preventDefault();
+        await fetch(`${dataSource}/sections/${editingSectionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                time: editingSectionTime,
+                room: editingSectionRoom
+            })
+        });
+        setEditingSectionId(null);
+        setEditingSectionTime('');
+        setEditingSectionRoom('');
+        fetchData();
+    };
+
+    const deleteSection = async (id) => {
+        await fetch(`${dataSource}/sections/${id}`, { method: 'DELETE' });
+        fetchData();
+    };
+    
 
     // Enrollments Editing
     const [editingEnrollmentId, setEditingEnrollmentId] = useState(null);
@@ -318,7 +382,36 @@ const TableView = ({asAdmin}) => {
             {/* Courses */}
             <div>
                 <h2>Courses</h2>
-                
+                {asAdmin && (
+                    <div>
+                        <form onSubmit={createCourse}>
+                            <input
+                                placeholder="Prefix"
+                                value={newCoursePrefix}
+                                onChange={(e) => setNewCoursePrefix(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Number"
+                                value={newCourseNumber}
+                                onChange={(e) => setNewCourseNumber(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Course Name"
+                                value={newCourseName}
+                                onChange={(e) => setNewCourseName(e.target.value)}
+                                required
+                            />
+                            <input
+                                placeholder="Course Description"
+                                value={newCourseDescription}
+                                onChange={(e) => setNewCourseDescription(e.target.value)}
+                            />
+                            <button type="submit">Add Course</button>
+                        </form>
+                    </div>
+                )}
                 <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
                     <thead>
                     <tr>
@@ -446,7 +539,6 @@ const TableView = ({asAdmin}) => {
                     <tr>
                         <th>Section ID</th>
                         <th>Course</th>
-                        <th>Section Number</th>
                         <th>Time</th>
                         <th>Room</th>
                         {asAdmin && <th>Actions</th>}
@@ -456,14 +548,44 @@ const TableView = ({asAdmin}) => {
                     {sections.map(section => (
                         <tr key={section.course_section_id}>
                             <td>{section.course_section_id}</td>
-                            <td>{`${section.prefix}-${section.number}`}</td>
-                            <td>{section.section_number}</td>
-                            <td>{section.time}</td>
-                            <td>{section.room}</td>
+                            <td>{section.prefix}-{section.number}-{section.section_number}: {section.name}</td>
+                            <td>
+                                {editingSectionId === section.course_section_id ? (
+                                    <input
+                                        value={editingSectionTime}
+                                        onChange={(e) => setEditingSectionTime(e.target.value)}
+                                    />
+                                ) : (
+                                    section.time
+                                )}
+                            </td>
+                            <td>
+                                {editingSectionId === section.course_section_id ? (
+                                    <input
+                                        value={editingSectionRoom}
+                                        onChange={(e) => setEditingSectionRoom(e.target.value)}
+                                    />
+                                ) : (
+                                    section.room
+                                )}
+                            </td>
                             {asAdmin && (
                                 <td>
-                                    <button onClick={() => {}}>Edit</button>
-                                    <button onClick={() => {}}>Delete</button>
+                                    {editingSectionId === section.course_section_id ? (
+                                        <>
+                                            <button onClick={(e) => updateSection(e)}>Save</button>
+                                            <button onClick={() => setEditingSectionId(null)}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => {
+                                                setEditingSectionId(section.course_section_id);
+                                                setEditingSectionTime(section.time);
+                                                setEditingSectionRoom(section.room);
+                                            }}>Edit</button>
+                                            <button onClick={() => deleteSection(section.course_section_id)}>Delete</button>
+                                        </>
+                                    )}
                                 </td>
                             )}
                         </tr>
@@ -487,13 +609,6 @@ const TableView = ({asAdmin}) => {
                                 placeholder="Last Name"
                                 value={newStudentLastName}
                                 onChange={(e) => setNewStudentLastName(e.target.value)}
-                                required
-                            />
-                            <input
-                                placeholder="Email"
-                                type="email"
-                                value={newStudentEmail}
-                                onChange={(e) => setNewStudentEmail(e.target.value)}
                                 required
                             />
                             <input

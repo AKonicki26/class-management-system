@@ -78,9 +78,9 @@ app.put('/courses/:id', (req, res) => {
 });
 
 app.post('/courses', (req, res) => {
-    const {prefix, number, name, division} = req.body;
+    const {prefix, number, name, description} = req.body;
     db.run(`INSERT INTO course (prefix, number, name, description) VALUES (?, ?, ?, ?)`,
-        [prefix, number, name, division],
+        [prefix, number, name, description],
         function (err) {
             if (err) return res.status(500).json(err);
             res.json({id: this.lastID});
@@ -126,15 +126,16 @@ JOIN course c
 ON cs.course_id = c.course_id`, [], (err, rows) => res.json(rows));
 });
 
-app.delete('/sections/id', (req, res) => {
+app.delete('/sections/:id', (req, res) => {
     db.run('DELETE FROM course_section WHERE course_section_id = ?', [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
         res.json({ deleted: this.changes });
     });
 })
 
-app.put('/sections/id', (req, res) => {
+app.put('/sections/:id', (req, res) => {
     const {time, room} = req.body;
+    console.log(req.body);
     db.run('UPDATE course_section SET time = ?, room = ? WHERE course_section_id = ?',
         [time, room, req.params.id],
         function (err) {
@@ -145,15 +146,22 @@ app.put('/sections/id', (req, res) => {
 
 app.post('/sections', (req, res) => {
     const {course_id, time, room} = req.body;
-    db.run(`INSERT INTO course_section (course_id, section_number, time, room) VALUES (?, (
-                SELECT max(section_number) + 1 from course_section
-                WHERE course_id = ${course_id}
-                ), ?, ?)`,
-        [course_id, time,  room],
-        function (err) {
-            if (err) return res.status(500).json(err);
-            res.json({id: this.lastID});
-        });
+    
+    // Get the next section number
+    db.get('SELECT MAX(section_number) + 1 AS next_section_number FROM course_section WHERE course_id = ?', [course_id], (err, row) => {
+        if (err) return res.status(500).json(err);
+
+        const nextSectionNumber = row.next_section_number || 1;
+
+        // Then make that section
+        db.run('INSERT INTO course_section (course_id, section_number, time, room) VALUES (?, ?, ?, ?)',
+            [course_id, nextSectionNumber, time, room],
+            function (err) {
+                if (err) return res.status(500).json(err);
+                res.json({ id: this.lastID });
+            }
+        );
+    });
 });
 
 app.get('/enrollments', (req, res) => {
