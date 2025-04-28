@@ -2,18 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const app = express();
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
 
 // Auth
+// Authentication taken from example warehouse project. 
+// Modified to use environment variables by Anne Konicki.
+// Credit for this endpoint goes to whoever wrote it originally.
 app.post('/login', (req, res) => {
     console.log('🛠️ LOGIN ATTEMPT RECEIVED');
     console.log('Request headers:', req.headers);
     console.log('Request body:', req.body);
   
     const { user, password } = req.body;
-    if (user === 'ADMIN' && password === 'ADMIN') {
+    if (user === process.env.DB_LOGIN_USERNAME && password === process.env.DB_LOGIN_PASSWORD) {
       console.log('✅ Login success');
       res.json({ success: true });
     } else {

@@ -1,5 +1,6 @@
 import './App.css';
 import TableView from "./components/TableView";
+import Login from "./components/Login"
 import {useState} from "react";
 
 function App() {
@@ -7,7 +8,13 @@ function App() {
     
   return (
     <div className="App">
-      <div></div>
+        <div style={{ textAlign: 'right', padding: '10px' }}>
+            {!loggedIn ? (
+                <Login onLogin={() => setLoggedIn(true)} />
+            ) : (
+                <button onClick={() => setLoggedIn(false)}>Logout</button>
+            )}
+        </div>
       <TableView asAdmin={loggedIn} />
     </div>
   );
