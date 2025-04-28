@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 
 const TableView = ({asAdmin}) => {
     const [majors, setMajors] = useState([]);
@@ -6,22 +6,22 @@ const TableView = ({asAdmin}) => {
     const [students, setStudents] = useState([]);
     const [sections, setSections] = useState([]);
     const [enrollments, setEnrollments] = useState([]);
-    
-    
+
+
     const dataSource = process.env.REACT_APP_DATA_SOURCE;
-    
+
     const getEmail = (firstName, lastName) => `${newStudentFirstName}.${newStudentLastName}@mymail.champlain.edu`.toLowerCase().replace(/[^0-9a-zA-Z.@]/g, '');
-    
+
     // Creations
 
     const [majorText, setMajorText] = useState('');
     const [divisionText, setDivisionText] = useState('');
-    const createMajor= async (e) => {
+    const createMajor = async (e) => {
         e.preventDefault();
-        console.log(majorText,  divisionText);
+        console.log(majorText, divisionText);
         await fetch(`${dataSource}/majors`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({major_name: majorText, division: divisionText})
         });
         setMajorText(null);
@@ -45,7 +45,7 @@ const TableView = ({asAdmin}) => {
         e.preventDefault();
         await fetch(`${dataSource}/courses`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 prefix: newCoursePrefix,
                 number: newCourseNumber,
@@ -64,7 +64,7 @@ const TableView = ({asAdmin}) => {
         e.preventDefault();
         await fetch(`${dataSource}/students`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 first_name: newStudentFirstName,
                 last_name: newStudentLastName,
@@ -89,7 +89,7 @@ const TableView = ({asAdmin}) => {
         e.preventDefault();
         await fetch(`${dataSource}/sections`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 course_id: newSectionCourseId,
                 time: newSectionTime,
@@ -108,53 +108,52 @@ const TableView = ({asAdmin}) => {
 
     const createEnrollment = async (e) => {
         e.preventDefault();
-        
+
         const selectedCourseId = sections.find(section => section.course_section_id === parseInt(newEnrollmentSectionId)).course_id;
-        
+
         // if there already exists a section in which the student is enrolled for this course
         if (enrollments.some(enroll =>
             enroll.student_id === parseInt(newEnrollmentStudentId) &&
             enroll.course_id === selectedCourseId
-        ))   
-        {
+        )) {
             window.alert("You cannot enroll a student in multiple sections of the same course!");
 
         } else {
             await fetch(`${dataSource}/enrollments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     student_id: newEnrollmentStudentId,
                     course_section_id: newEnrollmentSectionId
                 })
             });
         }
-        
+
         setNewEnrollmentStudentId('');
         setNewEnrollmentSectionId('');
         fetchData();
     }
 
     // Major Editing
-    const deleteMajor= async (id) => {
-        await fetch(`${dataSource}/majors/${id}`, { method: 'DELETE'});
+    const deleteMajor = async (id) => {
+        await fetch(`${dataSource}/majors/${id}`, {method: 'DELETE'});
         fetchData();
     }
 
     const [editingMajorId, setEditingMajorId] = useState(null);
     const [editingMajorText, setEditingMajorText] = useState('');
     const [editingDivisionText, setEditingDivisionText] = useState('');
-    
+
     const updateMajor = async (id) => {
         await fetch(`${dataSource}/majors/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ major: editingMajorText, division: editingDivisionText })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({major: editingMajorText, division: editingDivisionText})
         });
         setEditingMajorId(null);
         fetchData();
     }
-    
+
     // Course Editing
     const [editingCourseId, setEditingCourseId] = useState(null);
     const [editingCoursePrefix, setEditingCoursePrefix] = useState('');
@@ -165,7 +164,7 @@ const TableView = ({asAdmin}) => {
     const updateCourse = async (id) => {
         await fetch(`${dataSource}/courses/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 prefix: editingCoursePrefix,
                 number: editingCourseNumber,
@@ -178,7 +177,7 @@ const TableView = ({asAdmin}) => {
     }
 
     const deleteCourse = async (id) => {
-        await fetch(`${dataSource}/courses/${id}`, { method: 'DELETE' });
+        await fetch(`${dataSource}/courses/${id}`, {method: 'DELETE'});
         fetchData();
     }
 
@@ -192,7 +191,7 @@ const TableView = ({asAdmin}) => {
     const updateStudent = async (id) => {
         await fetch(`${dataSource}/students/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 first_name: editingStudentFirstName,
                 last_name: editingStudentLastName,
@@ -206,7 +205,7 @@ const TableView = ({asAdmin}) => {
     }
 
     const deleteStudent = async (id) => {
-        await fetch(`${dataSource}/students/${id}`, { method: 'DELETE' });
+        await fetch(`${dataSource}/students/${id}`, {method: 'DELETE'});
         fetchData();
     }
 
@@ -219,7 +218,7 @@ const TableView = ({asAdmin}) => {
         e.preventDefault();
         await fetch(`${dataSource}/sections/${editingSectionId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 time: editingSectionTime,
                 room: editingSectionRoom
@@ -232,10 +231,10 @@ const TableView = ({asAdmin}) => {
     };
 
     const deleteSection = async (id) => {
-        await fetch(`${dataSource}/sections/${id}`, { method: 'DELETE' });
+        await fetch(`${dataSource}/sections/${id}`, {method: 'DELETE'});
         fetchData();
     };
-    
+
 
     // Enrollments Editing
     const [editingEnrollmentId, setEditingEnrollmentId] = useState(null);
@@ -246,11 +245,11 @@ const TableView = ({asAdmin}) => {
     const [editingFinalExamGrade, setEditingFinalExamGrade] = useState(0);
 
     const clampGrade = (grade) => Math.min(Math.max(grade, 0), 100);
-    
+
     const updateEnrollment = async (studentId, sectionId) => {
         await fetch(`${dataSource}/enrollments/${studentId}/${sectionId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 quiz_grade_1: clampGrade(editingQuizGrade1),
                 quiz_grade_2: clampGrade(editingQuizGrade2),
@@ -286,13 +285,14 @@ const TableView = ({asAdmin}) => {
         fetch(`${dataSource}/enrollments`)
             .then(res => res.json())
             .then(setEnrollments);
-        
+
     }
-    
-    useEffect(() => {fetchData()});
-    
-    
-    
+
+    useEffect(() => {
+        fetchData()
+    });
+
+
     return (
         <div>
             {/* Majors */}
@@ -301,27 +301,27 @@ const TableView = ({asAdmin}) => {
                 {asAdmin && (
                     <div>
                         <form onSubmit={createMajor}>
-                           <>
-                               <input
+                            <>
+                                <input
                                     name="major_name"
                                     placeholder="Major Name"
                                     value={majorText || ''}
                                     onChange={(e) => setMajorText(e.target.value)}
                                     required
-                               />
-                               <input
-                                   name="division"
-                                   placeholder="Division"
-                                   value={divisionText || ''}
-                                   onChange={(e) => setDivisionText(e.target.value)}
-                                   required
-                               />
-                           </> 
-                            <button type="submit" >Add</button>
+                                />
+                                <input
+                                    name="division"
+                                    placeholder="Division"
+                                    value={divisionText || ''}
+                                    onChange={(e) => setDivisionText(e.target.value)}
+                                    required
+                                />
+                            </>
+                            <button type="submit">Add</button>
                         </form>
                     </div>
                 )}
-                <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
+                <table border="1" cellPadding="6" style={{marginBottom: '2em'}}>
                     <thead>
                     <tr>
                         <th>Major ID</th>
@@ -363,15 +363,16 @@ const TableView = ({asAdmin}) => {
                                         </>
                                     ) : (
                                         <>
-                                        <button onClick={() => {
-                                            setEditingMajorId(major.major_id);
-                                            setEditingMajorText(major.major);
-                                            setEditingDivisionText(major.division);
-                                        }}>Edit</button>
-                                        <button onClick={() => deleteMajor(major.major_id)}>Delete</button>
+                                            <button onClick={() => {
+                                                setEditingMajorId(major.major_id);
+                                                setEditingMajorText(major.major);
+                                                setEditingDivisionText(major.division);
+                                            }}>Edit
+                                            </button>
+                                            <button onClick={() => deleteMajor(major.major_id)}>Delete</button>
                                         </>
                                     )}
-                                    
+
                                 </td>
                             )}
                         </tr>
@@ -412,7 +413,7 @@ const TableView = ({asAdmin}) => {
                         </form>
                     </div>
                 )}
-                <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
+                <table border="1" cellPadding="6" style={{marginBottom: '2em'}}>
                     <thead>
                     <tr>
                         <th>Course ID</th>
@@ -424,7 +425,7 @@ const TableView = ({asAdmin}) => {
                             :
                             <th>Course Number</th>
                         }
-                        
+
                         <th>Course Name</th>
                         <th>Course Description</th>
                         {asAdmin && <th>Actions</th>}
@@ -471,7 +472,11 @@ const TableView = ({asAdmin}) => {
                                     </>
                                 )
                             ) : (
-                                <td>{`${course.prefix}-${course.number}`}</td>
+                                <>
+                                    <td>{`${course.prefix}-${course.number}`}</td>
+                                    <td>{course.name}</td>
+                                    <td>{course.description}</td>
+                                </>
                             )}
                             {asAdmin && (
                                 <td>
@@ -515,7 +520,8 @@ const TableView = ({asAdmin}) => {
                             >
                                 <option value="">Select Course</option>
                                 {courses.map(course => (
-                                    <option key={course.course_id} value={course.course_id}>{`${course.prefix}-${course.number}: ${course.name}`}</option>
+                                    <option key={course.course_id}
+                                            value={course.course_id}>{`${course.prefix}-${course.number}: ${course.name}`}</option>
                                 ))}
                             </select>
                             <input
@@ -534,7 +540,7 @@ const TableView = ({asAdmin}) => {
                         </form>
                     </div>
                 )}
-                <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
+                <table border="1" cellPadding="6" style={{marginBottom: '2em'}}>
                     <thead>
                     <tr>
                         <th>Section ID</th>
@@ -582,8 +588,10 @@ const TableView = ({asAdmin}) => {
                                                 setEditingSectionId(section.course_section_id);
                                                 setEditingSectionTime(section.time);
                                                 setEditingSectionRoom(section.room);
-                                            }}>Edit</button>
-                                            <button onClick={() => deleteSection(section.course_section_id)}>Delete</button>
+                                            }}>Edit
+                                            </button>
+                                            <button onClick={() => deleteSection(section.course_section_id)}>Delete
+                                            </button>
                                         </>
                                     )}
                                 </td>
@@ -632,24 +640,24 @@ const TableView = ({asAdmin}) => {
                         </form>
                     </div>
                 )}
-                <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
+                <table border="1" cellPadding="6" style={{marginBottom: '2em'}}>
                     <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            {asAdmin ?
-                                <>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                </>
-                                :
-                                <th>Name</th>
-                            }
-                            
-                            <th>E-Mail</th>
-                            <th>Major</th>
-                            <th>Graduating Year</th>
-                            {asAdmin && <th>Actions</th>}
-                        </tr>
+                    <tr>
+                        <th>Student ID</th>
+                        {asAdmin ?
+                            <>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                            </>
+                            :
+                            <th>Name</th>
+                        }
+
+                        <th>E-Mail</th>
+                        <th>Major</th>
+                        <th>Graduating Year</th>
+                        {asAdmin && <th>Actions</th>}
+                    </tr>
                     </thead>
                     <tbody>
                     {students.map(student => (
@@ -772,7 +780,7 @@ const TableView = ({asAdmin}) => {
                         </form>
                     </div>
                 )}
-                <table border="1" cellPadding="6" style={{ marginBottom: '2em' }}>
+                <table border="1" cellPadding="6" style={{marginBottom: '2em'}}>
                     <thead>
                     <tr>
                         <th>Student</th>
@@ -796,11 +804,16 @@ const TableView = ({asAdmin}) => {
 
                                 {isEditing ? (
                                     <>
-                                        <td><input type="number" value={editingQuizGrade1} onChange={(e) => setEditingQuizGrade1(e.target.value)} /></td>
-                                        <td><input type="number" value={editingQuizGrade2} onChange={(e) => setEditingQuizGrade2(e.target.value)} /></td>
-                                        <td><input type="number" value={editingProjectGrade1} onChange={(e) => setEditingProjectGrade1(e.target.value)} /></td>
-                                        <td><input type="number" value={editingProjectGrade2} onChange={(e) => setEditingProjectGrade2(e.target.value)} /></td>
-                                        <td><input type="number" value={editingFinalExamGrade} onChange={(e) => setEditingFinalExamGrade(e.target.value)} /></td>
+                                        <td><input type="number" value={editingQuizGrade1}
+                                                   onChange={(e) => setEditingQuizGrade1(e.target.value)}/></td>
+                                        <td><input type="number" value={editingQuizGrade2}
+                                                   onChange={(e) => setEditingQuizGrade2(e.target.value)}/></td>
+                                        <td><input type="number" value={editingProjectGrade1}
+                                                   onChange={(e) => setEditingProjectGrade1(e.target.value)}/></td>
+                                        <td><input type="number" value={editingProjectGrade2}
+                                                   onChange={(e) => setEditingProjectGrade2(e.target.value)}/></td>
+                                        <td><input type="number" value={editingFinalExamGrade}
+                                                   onChange={(e) => setEditingFinalExamGrade(e.target.value)}/></td>
                                     </>
                                 ) : (
                                     <>
@@ -816,7 +829,9 @@ const TableView = ({asAdmin}) => {
                                     <td>
                                         {isEditing ? (
                                             <>
-                                                <button onClick={() => updateEnrollment(enrollment.student_id, enrollment.course_section_id)}>Save</button>
+                                                <button
+                                                    onClick={() => updateEnrollment(enrollment.student_id, enrollment.course_section_id)}>Save
+                                                </button>
                                                 <button onClick={() => setEditingEnrollmentId(null)}>Cancel</button>
                                             </>
                                         ) : (
@@ -828,8 +843,11 @@ const TableView = ({asAdmin}) => {
                                                     setEditingProjectGrade1(enrollment.project_grade_1 ?? 0);
                                                     setEditingProjectGrade2(enrollment.project_grade_2 ?? 0);
                                                     setEditingFinalExamGrade(enrollment.final_exam_grade ?? 0);
-                                                }}>Edit</button>
-                                                <button onClick={() => deleteEnrollment(enrollment.student_id, enrollment.course_section_id)}>Delete</button>
+                                                }}>Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteEnrollment(enrollment.student_id, enrollment.course_section_id)}>Delete
+                                                </button>
                                             </>
                                         )}
                                     </td>
